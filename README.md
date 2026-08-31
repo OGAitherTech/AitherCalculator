@@ -4,23 +4,21 @@ A fast, mobile-first calculator by Aither.
 
 ## Version
 
-**3.0.0**
+**4.0.0**
 
-## What's new in 3.0
+## What's new in 4.0
 
-- `Ans` constant for quickly reusing the previous answer
-- Absolute value (`abs`) scientific function
-- Factorial (`n!`) for non-negative integers up to 170
-- Persistent DEG/RAD mode
-- Persistent calculator memory
-- Persistent previous answer
-- Auto-copy result option
-- Calculation history increased to 100 entries
-- History timestamps
-- Expanded scientific keypad
-- Improved responsive layout for small iPhones, tablets, and desktop
-- Refreshed Settings panel
-- Working Force Update button
+- Built-in unit converter
+- Length conversion: meters, kilometers, centimeters, millimeters, inches, feet, yards, and miles
+- Mass conversion: grams, kilograms, milligrams, ounces, and pounds
+- Speed conversion: m/s, km/h, mph, ft/s, and knots
+- Temperature conversion: Celsius, Fahrenheit, and Kelvin
+- One-tap unit swapping
+- Live conversion results as you type
+- Mobile-friendly converter sheet
+- Scientific calculator, memory, Ans, history, themes, haptics, sound, and auto-copy retained
+- Improved compact-screen layout
+- Version text synchronized to 4.0.0
 
 ## Features
 
@@ -30,6 +28,7 @@ A fast, mobile-first calculator by Aither.
 - DEG and RAD angle modes
 - Calculator memory: MC, MR, M+, and M−
 - Calculation history stored locally on the device
+- Unit converter with four conversion categories
 - Light and dark themes
 - Optional haptic feedback
 - Optional sound effects
@@ -46,9 +45,9 @@ Open `index.html` in a browser, or deploy the repository with GitHub Pages.
 
 ## Files
 
-- `index.html` — app structure and controls
+- `index.html` — app structure, calculator, settings, and converter UI
 - `style.css` — responsive UI, themes, and mobile layout
-- `app.js` — calculator engine, scientific functions, memory, history, settings, and interactions
+- `app.js` — calculator engine, scientific functions, memory, history, settings, and unit conversion
 
 ## License
 
