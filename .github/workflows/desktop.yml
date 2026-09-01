@@ -12,19 +12,30 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        include:
+          - os: windows-latest
+            artifact: windows
+          - os: macos-latest
+            artifact: macos
+          - os: ubuntu-latest
+            artifact: linux
     runs-on: ${{ matrix.os }}
     defaults:
       run:
         working-directory: desktop
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install
-      - run: npm run build
-      - uses: actions/upload-artifact@v4
+      - name: Install dependencies
+        run: npm install
+      - name: Build desktop app
+        run: npm run build
+      - name: Upload installers
+        uses: actions/upload-artifact@v4
         with:
-          name: aither-calculator-${{ matrix.os }}
+          name: aither-calculator-${{ matrix.artifact }}
           path: desktop/dist/*
