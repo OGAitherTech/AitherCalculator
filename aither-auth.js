@@ -1,63 +1,12 @@
-/* Aither shared account client.
-   Set AITHER_API_URL to your deployed AitherBackend HTTPS URL, or save it in Settings.
-*/
+/* Aither shared account client. Uses the same Render-hosted AitherBackend session as every Aither app. */
 (() => {
-  const API_KEY = 'aitherApiUrl';
-  const getApiUrl = () => (localStorage.getItem(API_KEY) || window.AITHER_API_URL || '').replace(/\/$/, '');
-  const request = async (path, options = {}) => {
-    const base = getApiUrl();
-    if (!base) throw new Error('AitherBackend URL is not configured.');
-    const response = await fetch(`${base}${path}`, {
-      ...options,
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }
-    });
-    let data = {};
-    try { data = await response.json(); } catch (_) {}
-    if (!response.ok) throw new Error(data.detail || `Request failed (${response.status})`);
-    return data;
-  };
-  const escape = value => String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-  const toast = message => window.showToast ? window.showToast(message) : alert(message);
-
-  const inject = () => {
-    if (document.getElementById('aitherAccountModal')) return;
-    const button = document.createElement('button');
-    button.id = 'accountBtn'; button.className = 'pill'; button.textContent = 'Account';
-    document.querySelector('.top-actions')?.insertBefore(button, document.getElementById('settingsBtn'));
-    const modal = document.createElement('div'); modal.id = 'aitherAccountModal'; modal.className = 'modal hidden';
-    modal.innerHTML = `<div class="modal-card"><div class="modal-head"><h2>Aither Account</h2><button id="aitherClose" class="icon-btn">×</button></div><div id="aitherAccountBody"><p>Checking your Aither account…</p></div><div class="aither-auth-config"><label class="setting"><span>AitherBackend URL</span><input id="aitherApiUrl" class="convert-input" type="url" placeholder="https://your-aither-backend.example"></label><button id="aitherSaveUrl" class="setting-button secondary">Save backend URL</button></div></div>`;
-    document.body.appendChild(modal);
-    button.onclick = () => { modal.classList.remove('hidden'); refresh(); };
-    document.getElementById('aitherClose').onclick = () => modal.classList.add('hidden');
-    modal.onclick = e => { if (e.target === modal) modal.classList.add('hidden'); };
-    document.getElementById('aitherApiUrl').value = getApiUrl();
-    document.getElementById('aitherSaveUrl').onclick = async () => { const url = document.getElementById('aitherApiUrl').value.trim().replace(/\/$/, ''); if (url && !/^https?:\/\//i.test(url)) return toast('Use an HTTPS backend URL.'); if (url) localStorage.setItem(API_KEY, url); else localStorage.removeItem(API_KEY); toast(url ? 'AitherBackend saved' : 'Backend URL cleared'); refresh(); };
-  };
-
-  const refresh = async () => {
-    const body = document.getElementById('aitherAccountBody'); if (!body) return;
-    document.getElementById('aitherApiUrl').value = getApiUrl();
-    if (!getApiUrl()) { body.innerHTML = '<p>Connect this app to your deployed AitherBackend to use one shared Aither account across your apps.</p>'; return; }
-    try {
-      const data = await request('/api/auth/session');
-      if (data.authenticated) {
-        body.innerHTML = `<div class="aither-user"><strong>${escape(data.user.name)}</strong><span>${escape(data.user.email)}</span></div><button id="aitherLogout" class="setting-button">Log out</button>`;
-        document.getElementById('aitherLogout').onclick = async () => { try { await request('/api/auth/logout', { method:'POST', body:'{}' }); toast('Signed out'); refresh(); } catch (e) { toast(e.message); } };
-      } else showForm('login');
-    } catch (e) { body.innerHTML = `<p>Could not connect to AitherBackend.</p><small>${escape(e.message)}</small>`; }
-  };
-
-  const showForm = mode => {
-    const register = mode === 'register';
-    document.getElementById('aitherAccountBody').innerHTML = `<form id="aitherAuthForm"><label class="setting"><span>${register ? 'Name' : 'Email'}</span><input id="aitherField1" class="convert-input" required ${register ? 'maxlength="80"' : 'type="email"'}></label>${register ? '<label class="setting"><span>Email</span><input id="aitherEmail" class="convert-input" type="email" required></label>' : ''}<label class="setting"><span>Password</span><input id="aitherPassword" class="convert-input" type="password" minlength="8" required></label><button class="setting-button" type="submit">${register ? 'Create Aither Account' : 'Log in'}</button></form><button id="aitherSwitch" class="text-btn">${register ? 'Already have an account? Log in' : 'Create a new Aither account'}</button>`;
-    document.getElementById('aitherSwitch').onclick = () => showForm(register ? 'login' : 'register');
-    document.getElementById('aitherAuthForm').onsubmit = async e => {
-      e.preventDefault();
-      const payload = register ? { name: document.getElementById('aitherField1').value.trim(), email: document.getElementById('aitherEmail').value.trim(), password: document.getElementById('aitherPassword').value } : { email: document.getElementById('aitherField1').value.trim(), password: document.getElementById('aitherPassword').value };
-      try { await request(register ? '/api/auth/register' : '/api/auth/login', { method:'POST', body: JSON.stringify(payload) }); toast(register ? 'Aither account created' : 'Welcome back'); refresh(); } catch (err) { toast(err.message); }
-    };
-  };
-  window.AitherAuth = { getApiUrl, request, refresh };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inject); else inject();
+  const API_KEY='aitherApiUrl', DEFAULT_API_URL='https://aither-backend.onrender.com';
+  const getApiUrl=()=> (localStorage.getItem(API_KEY)||window.AITHER_API_URL||DEFAULT_API_URL).replace(/\/$/,'');
+  const request=async(path,options={})=>{const r=await fetch(getApiUrl()+path,{...options,credentials:'include',headers:{'Content-Type':'application/json',...(options.headers||{})},cache:'no-store'});let d={};try{d=await r.json()}catch(_){}if(!r.ok)throw new Error(Array.isArray(d.detail)?d.detail.map(x=>x.msg).join(', '):(d.detail||`Request failed (${r.status})`));return d};
+  const escape=v=>String(v).replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
+  const toast=m=>window.showToast?window.showToast(m):alert(m);
+  const inject=()=>{if(document.getElementById('aitherAccountModal'))return;const b=document.createElement('button');b.id='accountBtn';b.className='pill';b.textContent='Account';document.querySelector('.top-actions')?.insertBefore(b,document.getElementById('settingsBtn'));const m=document.createElement('div');m.id='aitherAccountModal';m.className='modal hidden';m.innerHTML=`<div class="modal-card"><div class="modal-head"><h2>Aither Account</h2><button id="aitherClose" class="icon-btn">×</button></div><div id="aitherAccountBody"></div><div class="aither-auth-config"><label class="setting"><span>AitherBackend URL</span><input id="aitherApiUrl" class="convert-input" type="url" placeholder="https://aither-backend.onrender.com"></label><button id="aitherSaveUrl" class="setting-button secondary">Save backend URL</button></div></div>`;document.body.appendChild(m);b.onclick=()=>{m.classList.remove('hidden');refresh()};document.getElementById('aitherClose').onclick=()=>m.classList.add('hidden');m.onclick=e=>{if(e.target===m)m.classList.add('hidden')};document.getElementById('aitherApiUrl').value=getApiUrl();document.getElementById('aitherSaveUrl').onclick=()=>{const u=document.getElementById('aitherApiUrl').value.trim().replace(/\/$/,'');if(u&&!/^https?:\/\//i.test(u))return toast('Use an HTTP or HTTPS backend URL.');if(u)localStorage.setItem(API_KEY,u);else localStorage.removeItem(API_KEY);toast('AitherBackend saved');refresh()}};
+  const refresh=async()=>{const body=document.getElementById('aitherAccountBody');if(!body)return;try{const d=await request('/api/auth/session');if(d.authenticated){body.innerHTML=`<div class="aither-user"><strong>${escape(d.user.name)}</strong><span>${escape(d.user.email)}</span></div><button id="aitherLogout" class="setting-button">Log out</button>`;document.getElementById('aitherLogout').onclick=async()=>{await request('/api/auth/logout',{method:'POST'});toast('Signed out');refresh()}}else showForm('login')}catch(e){body.innerHTML=`<p>Could not connect to AitherBackend.</p><small>${escape(e.message)}</small>`}};
+  const showForm=mode=>{const reg=mode==='register';document.getElementById('aitherAccountBody').innerHTML=`<form id="aitherAuthForm"><label class="setting"><span>${reg?'Name':'Email'}</span><input id="aitherField1" class="convert-input" required ${reg?'maxlength="80"':'type="email"'}></label>${reg?'<label class="setting"><span>Email</span><input id="aitherEmail" class="convert-input" type="email" required></label>':''}<label class="setting"><span>Password</span><input id="aitherPassword" class="convert-input" type="password" minlength="8" required></label><button class="setting-button" type="submit">${reg?'Create Aither Account':'Log in'}</button></form><button id="aitherSwitch" class="text-btn">${reg?'Already have an account? Log in':'Create a new Aither account'}</button>`;document.getElementById('aitherSwitch').onclick=()=>showForm(reg?'login':'register');document.getElementById('aitherAuthForm').onsubmit=async e=>{e.preventDefault();const p=reg?{name:document.getElementById('aitherField1').value.trim(),email:document.getElementById('aitherEmail').value.trim(),password:document.getElementById('aitherPassword').value}:{email:document.getElementById('aitherField1').value.trim(),password:document.getElementById('aitherPassword').value};try{await request(reg?'/api/auth/register':'/api/auth/login',{method:'POST',body:JSON.stringify(p)});toast(reg?'Aither account created':'Welcome back');refresh()}catch(err){toast(err.message)}}};
+  window.AitherAuth={getApiUrl,request,refresh};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',inject);else inject();
 })();
