@@ -4,20 +4,24 @@ A fast, mobile-first calculator by Aither.
 
 ## Version
 
-**5.0.0**
+**5.1.0**
 
-## What's new in 5.0
+## Shared Aither Account
 
-- Cleaner, denser mobile keypad
-- Parenthesis controls added to the main keypad
-- Reciprocal (`1/x`) shortcut
-- One-tap result copying from the keypad
-- Install-to-home-screen support when the browser supports PWA installation
-- Offline caching through a service worker
-- Web app manifest for a more app-like iPhone/Android experience
-- Unit converter retained with length, mass, temperature, and speed categories
-- Scientific mode, memory, Ans, history, themes, haptics, sound, and auto-copy retained
-- Version text synchronized to 5.0.0
+Aither Calculator uses the same AitherBackend account service as the other Aither apps. Use the same email and password to sign in to the same Aither account across services.
+
+- Register: `/api/auth/register`
+- Login: `/api/auth/login`
+- Session: `/api/auth/session`
+- Logout: `/api/auth/logout`
+- Default backend: `https://aither-backend.onrender.com`
+
+## What's new in 5.1
+
+- Added shared Aither account sign-in and account creation
+- Added session restore and sign-out
+- Connected the account client to the common AitherBackend service
+- Kept calculator data and history local to the device
 
 ## Features
 
@@ -37,7 +41,8 @@ A fast, mobile-first calculator by Aither.
 - Responsive layout designed for iPhone, Android, tablet, and desktop
 - PWA manifest and offline service worker
 - Settings modal with a working Force Update button
-- No external libraries or API keys required
+- Shared Aither account
+- No calculator API key required
 
 ## Run
 
@@ -48,6 +53,7 @@ Open `index.html` in a browser, or deploy the repository with GitHub Pages.
 - `index.html` — app structure, calculator, settings, converter, and install UI
 - `style.css` — responsive UI, themes, converter, and mobile layout
 - `app.js` — calculator engine, scientific functions, memory, history, settings, unit conversion, and PWA install handling
+- `aither-account.js` — shared AitherBackend account client
 - `manifest.json` — web app metadata
 - `sw.js` — offline cache and update worker
 
